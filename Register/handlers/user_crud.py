@@ -1,4 +1,3 @@
-from sqlalchemy import NVARCHAR
 
 from Register.db.sqlalchemy_db import async_session
 from Register.db.sqlalchemy_db import Users
