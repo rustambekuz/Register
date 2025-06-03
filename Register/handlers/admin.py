@@ -41,7 +41,8 @@ class AdminDeleteUserFSM(StatesGroup):
 async def admin_create_handler(callback: CallbackQuery, state: FSMContext):
     await state.set_state(RegisterState.first_name)
     await callback.message.answer("Ismini kiriting:")
-    await callback.answer()
+    await callback.answer(cache_time=60)
+
 
 
 @admin_router.message(RegisterState.first_name)
@@ -86,7 +87,7 @@ from Register.db.sqlalchemy_db import async_session
 @admin_router.message(RegisterState.address)
 async def process_address(message: Message, state: FSMContext):
     if not re.match(r"^.{5,100}$", message.text):
-        return await message.answer("❌ Manzil juda qisqa yoki juda uzun. 5 dan 100 gacha belgi bo‘lishi kerak.")
+        return await message.answer("❌ Manzil xato formatda, Iltimos qaytadan kiriting.")
     await state.update_data(address=message.text)
     data = await state.get_data()
 
@@ -111,7 +112,7 @@ async def process_address(message: Message, state: FSMContext):
 async def admin_search_start(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer("🔍 Foydalanuvchi qidirish uchun ID kiriting:")
     await state.set_state(AdminSearchUserFSM.search_name)
-    await callback.answer()
+    await callback.answer(cache_time=60)
 
 
 @admin_router.message(AdminSearchUserFSM.search_name)
@@ -137,7 +138,7 @@ async def admin_list_handler(callback: CallbackQuery):
         else:
             users_text = "Foydalanuvchilar topilmadi."
         await callback.message.answer(f"📋 Barcha foydalanuvchilar ro‘yxati:\n{users_text}")
-    await callback.answer()
+    await callback.answer(cache_time=60)
 
 
 # admin user update
@@ -145,6 +146,7 @@ async def admin_list_handler(callback: CallbackQuery):
 async def admin_update_start(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer("🆔 Tahrirlamoqchi bo‘lgan foydalanuvchining ID sini yuboring:")
     await state.set_state(AdminUpdateUserFSM.step1)
+    await callback.answer(cache_time=60)
 
 
 
@@ -194,6 +196,7 @@ async def admin_field_choice(callback: CallbackQuery, state: FSMContext):
     await state.update_data(field=field)
     await callback.message.answer(f"✍️ Yangi qiymatni yuboring ({field.replace('_', ' ').capitalize()}):")
     await state.set_state(AdminUpdateUserFSM.step3)
+    await callback.answer(cache_time=60)
 
 
 
@@ -218,6 +221,7 @@ async def admin_delete_user(callback: CallbackQuery, state: FSMContext):
     async with async_session() as session:
         await callback.message.answer("🆔 O‘chirmoqchi bo‘lgan foydalanuvchining ID sini yuboring:")
         await state.set_state(AdminDeleteUserFSM.delete_user_id)
+        await callback.answer(cache_time=60)
 
 @admin_router.message(AdminDeleteUserFSM.delete_user_id)
 async def admin_delete_user_id(message: Message, state: FSMContext):

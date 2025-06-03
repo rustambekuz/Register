@@ -92,17 +92,20 @@ async def show_profile(callback: CallbackQuery):
             text= "❌ Profil topilmadi."
 
         await callback.message.edit_text(text=text, reply_markup=get_back_menu(), parse_mode="HTML")
+        await callback.answer(cache_time=60)
 
 
 
 @router1.callback_query(F.data == "edit_profile")
 async def edit_profile_start(callback: CallbackQuery):
     await callback.message.edit_reply_markup(reply_markup=get_edit_profile_menu())
+    await callback.answer(cache_time=60)
 
 
 @router1.callback_query(F.data == "back_to_menu")
 async def back_to_menu(callback: CallbackQuery):
     await callback.message.edit_reply_markup(reply_markup=get_user_menu())
+    await callback.answer(cache_time=60)
 
 
 
@@ -117,6 +120,8 @@ async def delete_profile_handler(callback: CallbackQuery):
         else:
             await callback.message.edit_text("Siz ro'yxatdan o'tmagansiz. Profilni o'chirish mumkin emas.")
         await callback.answer()
+    await callback.answer(cache_time=60)
+
 
 
 
