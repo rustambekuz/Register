@@ -1,18 +1,20 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
-from Register.handlers.config import DB_URL
-from sqlalchemy import Column, Integer, String, BigInteger, update
+from sqlalchemy import Column, Integer, String, BigInteger
 
-engine = create_async_engine(DB_URL, echo=True)
+from Register.handlers.config import PSQL_HOST, PSQL_USER, PSQL_PASSWORD, PSQLDB_NAME
 
+DB_URL = f"postgresql+asyncpg://{PSQL_USER}:{PSQL_PASSWORD}@{PSQL_HOST}/{PSQLDB_NAME}"
+engine = create_async_engine(DB_URL, echo=True, pool_recycle=3600)
 
 async_session = async_sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
 Base = declarative_base()
 
 class Users(Base):
     __tablename__ = 'users'
+
     id = Column(Integer, primary_key=True, autoincrement=True)
-    chat_id = Column(BigInteger, unique=True)
+    chat_id = Column(BigInteger, unique=True, nullable=False)
     first_name = Column(String(50))
     last_name = Column(String(50))
     username = Column(String(50), nullable=True)
@@ -21,8 +23,9 @@ class Users(Base):
     address = Column(String(100), nullable=True)
 
     def __repr__(self):
-        return (f"{self.__class__.__name__}({self.id}, {self.first_name!r}, {self.last_name}),"
-                f" {self.username!r}, {self.phone!r}, {self.email!r}, {self.address!r})")
+        return (f"{self.__class__.__name__}({self.id}, {self.first_name!r}, {self.last_name!r}, "
+                f"{self.username!r}, {self.phone!r}, {self.email!r}, {self.address!r})")
+
 
 async def update_user_field_by_chat_id(chat_id: int, field: str, value: str):
     async with async_session() as session:
