@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
 def get_user_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -26,15 +27,15 @@ def get_edit_profile_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="👨‍🦰 Ism", callback_data="edit_first_name"),
-            InlineKeyboardButton(text="👨‍🦰 Familiya", callback_data="edit_last_name")
+            InlineKeyboardButton(text="👨‍🦰 Familiya", callback_data="edit_last_name"),
+            InlineKeyboardButton(text="📞 Telefon", callback_data="edit_phone")
         ],
         [
             InlineKeyboardButton(text="📧 Email", callback_data="edit_email"),
-            InlineKeyboardButton(text="🏠 Manzil", callback_data="edit_address")
-        ],
-        [
+            InlineKeyboardButton(text="🏠 Manzil", callback_data="edit_address"),
             InlineKeyboardButton(text="🔙 Orqaga", callback_data="back_to_menu")
-        ]
+
+        ],
     ])
 
 
@@ -57,4 +58,23 @@ def admin_edit_profile():
             InlineKeyboardButton(text="🔙 Orqaga", callback_data="a_back_to_menu")
         ],
     ])
+
+
+
+phone_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="📱 Telefon raqamni yuborish", request_contact=True)]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
+location_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="📍 Manzilni yuborish", request_location=True)]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
+
 

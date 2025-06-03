@@ -5,9 +5,11 @@ from aiogram.types import CallbackQuery
 from aiogram.types import Message
 from sqlalchemy import select, update
 from Register.db.sqlalchemy_db import Users
+from aiogram import types
+import re
 
 from Register.handlers.user_crud import get_all_users, add_user, search_users_by_name
-from Register.keyboards.menus import admin_edit_profile, get_admin_menu
+from Register.keyboards.menus import admin_edit_profile, get_admin_menu, get_user_menu
 
 admin_router = Router()
 
@@ -43,38 +45,48 @@ async def admin_create_handler(callback: CallbackQuery, state: FSMContext):
 
 
 @admin_router.message(RegisterState.first_name)
-async def process_first_name(message: Message, state: FSMContext):
+async def register_first_name(message: types.Message, state: FSMContext):
+    if not re.match(r"^[A-Za-zА-Яа-яʻғқўҳ\s]{2,30}$", message.text):
+        return await message.answer("❌ Ism noto‘g‘ri formatda. Iltimos, qaytdan kiritng")
     await state.update_data(first_name=message.text)
     await state.set_state(RegisterState.last_name)
     await message.answer("Familiyasini kiriting:")
 
 
+
 @admin_router.message(RegisterState.last_name)
-async def process_last_name(message: Message, state: FSMContext):
+async def register_last_name(message: types.Message, state: FSMContext):
+    if not re.match(r"^[A-Za-zА-Яа-яʻғқўҳ\s]{2,30}$", message.text):
+        return await message.answer("❌ Familiya noto‘g‘ri formatda. Iltimos, faqat harflardan iborat familiya kiriting.")
     await state.update_data(last_name=message.text)
     await state.set_state(RegisterState.phone)
-    await message.answer("Telefon raqamini kiriting:")
+    await message.answer("Telefon raqamini kiriting (masalan, +998901234567):")
 
 
 @admin_router.message(RegisterState.phone)
-async def process_phone(message: Message, state: FSMContext):
+async def register_phone(message: types.Message, state: FSMContext):
+    if not re.match(r"^\+998\d{9}$", message.text):
+        return await message.answer("❌ Telefon raqami noto‘g‘ri. Formati: +998901234567")
     await state.update_data(phone=message.text)
     await state.set_state(RegisterState.email)
     await message.answer("Email manzilini kiriting:")
 
 
 @admin_router.message(RegisterState.email)
-async def process_email(message: Message, state: FSMContext):
+async def register_email(message: types.Message, state: FSMContext):
+    if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", message.text):
+        return await message.answer("❌ Email noto‘g‘ri formatda. Masalan: test@mail.com")
     await state.update_data(email=message.text)
     await state.set_state(RegisterState.address)
     await message.answer("Yashash manzilini kiriting:")
-
 
 from Register.db.sqlalchemy_db import async_session
 
 
 @admin_router.message(RegisterState.address)
 async def process_address(message: Message, state: FSMContext):
+    if not re.match(r"^.{5,100}$", message.text):
+        return await message.answer("❌ Manzil juda qisqa yoki juda uzun. 5 dan 100 gacha belgi bo‘lishi kerak.")
     await state.update_data(address=message.text)
     data = await state.get_data()
 
@@ -124,7 +136,7 @@ async def admin_list_handler(callback: CallbackQuery):
             users_text = "\n".join([f"ID:{user.id}\n{user.first_name} {user.last_name}" for user in users])
         else:
             users_text = "Foydalanuvchilar topilmadi."
-        await callback.message.answer(f"📋 Barcha foydalanuvchilar ro‘yxati:\n{users_text}", reply_markup=get_admin_menu())
+        await callback.message.answer(f"📋 Barcha foydalanuvchilar ro‘yxati:\n{users_text}")
     await callback.answer()
 
 

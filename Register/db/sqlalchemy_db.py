@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from Register.handlers.config import DB_URL
-from sqlalchemy import Column, Integer, String, BigInteger
+from sqlalchemy import Column, Integer, String, BigInteger, update
 
 engine = create_async_engine(DB_URL, echo=True)
 
@@ -24,8 +24,29 @@ class Users(Base):
         return (f"{self.__class__.__name__}({self.id}, {self.first_name!r}, {self.last_name}),"
                 f" {self.username!r}, {self.phone!r}, {self.email!r}, {self.address!r})")
 
+async def update_user_field_by_chat_id(chat_id: int, field: str, value: str):
+    async with async_session() as session:
+        stmt = (
+            update(Users).where(Users.chat_id == chat_id).values({field: value})
+        )
+        await session.execute(stmt)
+        await session.commit()
 
 
+import aiohttp
+
+async def get_address_from_coords(latitude, longitude):
+    url = f"https://nominatim.openstreetmap.org/reverse?lat={latitude}&lon={longitude}&format=json"
+    headers = {
+        "User-Agent": "TestBot/1.0"
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            if response.status == 200:
+                data = await response.json()
+                return data.get("display_name")
+            return None
 
 
 

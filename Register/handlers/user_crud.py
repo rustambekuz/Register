@@ -81,8 +81,8 @@ async def show_profile(callback: CallbackQuery):
         if user:
             text = (f"👤 <b>Sizning profilingiz</b>:\n\n"
                     f"🆔 ID: <code>{user.chat_id}</code>\n"
-                    f"📛 Ism: {user.first_name}\n"
-                    f"👪 Familiya: {user.last_name}\n"
+                    f"👨‍🦰 Ism: {user.first_name}\n"
+                    f"👨‍🦰 Familiya: {user.last_name}\n"
                     f"👤 Username: @{user.username or 'yo‘q'}\n"
                     f"📞 Telefon: {user.phone or 'yo‘q'}\n"
                     f"📧 Email: {user.email or 'yo‘q'}\n"
