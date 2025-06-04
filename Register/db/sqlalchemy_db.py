@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, BigInteger
+from sqlalchemy import update
 
 from Register.handlers.config import PSQL_HOST, PSQL_USER, PSQL_PASSWORD, PSQLDB_NAME
 
