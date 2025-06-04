@@ -8,7 +8,6 @@ from sqlalchemy import select, update
 from aiogram.fsm.state import StatesGroup, State
 
 from Register.db.sqlalchemy_db import async_session, Users, get_address_from_coords
-from Register.handlers.admin import RegisterState
 from Register.handlers.config import ADMIN_ID
 from Register.handlers.user_crud import add_user
 from Register.keyboards.menus import (get_user_menu, get_admin_menu,
@@ -25,6 +24,13 @@ class EditProfileFSM(StatesGroup):
     email = State()
     address = State()
 
+
+class RegisterUserFSM(StatesGroup):
+    first_name = State()
+    last_name = State()
+    phone = State()
+    email = State()
+    address = State()
 
 from Register.db.sqlalchemy_db import update_user_field_by_chat_id
 #edit_first_name
@@ -102,25 +108,25 @@ async def process_address(message: Message, state: FSMContext):
     await state.clear()
 
 
+# Register users
 
-
-@router2.message(RegisterState.first_name)
+@router2.message(RegisterUserFSM.first_name)
 async def get_first_name(message: types.Message, state: FSMContext):
     if not re.match(r"^[A-Za-zА-Яа-яʻғқўҳ\s]{2,30}$", message.text):
         return await message.answer("❌ Ism noto‘g‘ri formatda. Iltimos, qaytdan kiritng")
     await state.update_data(first_name=message.text)
     await message.answer("Familiyangizni kiriting:")
-    await state.set_state(RegisterState.last_name)
+    await state.set_state(RegisterUserFSM.last_name)
 
 
-@router2.message(RegisterState.last_name)
+@router2.message(RegisterUserFSM.last_name)
 async def get_last_name(message: types.Message, state: FSMContext):
     await state.update_data(last_name=message.text)
     await message.answer("Telefon raqamingizni ulashing:", reply_markup=phone_keyboard)
-    await state.set_state(RegisterState.phone)
+    await state.set_state(RegisterUserFSM.phone)
 
 
-@router2.message(RegisterState.phone)
+@router2.message(RegisterUserFSM.phone)
 async def get_phone(message: types.Message, state: FSMContext):
     if not message.contact or not message.contact.phone_number:
         return await message.answer("❌ Telefon raqamini tugma orqali yuboring.", reply_markup=phone_keyboard)
@@ -135,18 +141,18 @@ async def get_phone(message: types.Message, state: FSMContext):
 
     await state.update_data(phone=phone_number)
     await message.answer("📧 Email manzilingizni kiriting:", reply_markup=types.ReplyKeyboardRemove())
-    await state.set_state(RegisterState.email)
+    await state.set_state(RegisterUserFSM.email)
 
 
-@router2.message(RegisterState.email)
+@router2.message(RegisterUserFSM.email)
 async def get_email(message: types.Message, state: FSMContext):
     if not re.match(r"^[\w\.-]+@[\w\.-]+\.\w{2,}$", message.text):
         return await message.answer("❌ Email noto‘g‘ri formatda. Iltimos, qaytdan kiritng")
     await state.update_data(email=message.text)
     await message.answer("📍 Lokatsiyangizni yuboring quyidagi tugma orqali 👇", reply_markup=location_keyboard)
-    await state.set_state(RegisterState.address)
+    await state.set_state(RegisterUserFSM.address)
 
-@router2.message(RegisterState.address)
+@router2.message(RegisterUserFSM.address)
 async def get_address(message: types.Message, state: FSMContext):
     if not message.location:
         return await message.answer("❌ Iltimos, manzilni 📍 Location tugmasi orqali yuboring.", reply_markup=location_keyboard)
@@ -202,7 +208,7 @@ async def start_handler(message: Message, state: FSMContext):
 
     else:
         await message.answer("👋 Salom! Ro‘yxatdan o‘tish uchun ismingizni kiriting:")
-        await state.set_state(RegisterState.first_name)
+        await state.set_state(RegisterUserFSM.first_name)
 
 
 @router2.message(Command("help"))
